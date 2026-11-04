@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Экспедиция: Тайна скорости</title>
+<style>
+:root{--blue:#2367a8;--blue2:#eaf3fc;--ink:#203044;--muted:#65758a;--line:#d9e2ec;--green:#247a50;--red:#b23b3b;--gold:#f3bd4f}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#e8f5ff,#f7fbff 360px);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:linear-gradient(90deg,#ffffffef,#ffffffd9),url("expedition-map.jpg") center 43%/cover;border-bottom:1px solid var(--line)}
+header .wrap{padding:10px 0}
+h1{color:#174c78;text-shadow:0 1px 0 #fff}
+.card{box-shadow:0 8px 24px #16456b12}
+.panel{background:linear-gradient(180deg,#fbfdff,#f1f7fc)}
+.stagebtn{font-weight:600}
+.stagebtn.done{background:#effaf2;color:#17633c}
+.taskbtn{font-weight:600}
+.btn{box-shadow:0 3px 0 #174d7d22;transition:transform .12s,filter .12s}
+.btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+.vehicle{font-size:58px;filter:drop-shadow(0 3px 2px #0004)}
+.road{background:linear-gradient(#cdeeff 0 38%,#b8df9d 38% 100%)}
+.metric{border:1px solid #d4e6f6}
+.feedback{font-weight:550}
+.expedition-hero{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:16px}
+.expedition-hero img{width:100%;height:190px;object-fit:cover;border-radius:12px}
+.expedition-hero .guide{display:flex;align-items:center;gap:12px}
+.expedition-hero .guide img{width:86px;height:120px;object-fit:contain;object-position:center}
+.trackbox{border:1px solid #d4e3ee;border-radius:13px;padding:12px;background:linear-gradient(#eaf7ff 0 44%,#e5f1d9 44%);margin:12px 0}
+.track{height:76px;position:relative;border-radius:9px;background:repeating-linear-gradient(90deg,#707d88 0 9.5%,#fff 9.5% 10%);border:4px solid #66727c;overflow:visible;margin:8px 0 18px}
+.track:after{content:"";position:absolute;left:0;right:0;top:50%;border-top:3px dashed #fff}
+.track .rider{position:absolute;bottom:-2px;transform:translateX(-50%);font-size:54px;line-height:1.15;z-index:2;filter:drop-shadow(0 3px 2px #0004)}
+.track-labels{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:#3b5368}
+.lane{margin:8px 0}
+.scale-road{height:84px;position:relative;margin:18px 4px 32px;border-radius:10px;background:#687681;border:5px solid #52616c}
+.scale-road .fill{position:absolute;left:0;top:0;bottom:0;background:#f5c65e;border-radius:5px 0 0 5px;transition:width .25s}
+.scale-road .car{position:absolute;top:-48px;transform:translateX(-50%);font-size:62px;line-height:1;transition:left .25s;z-index:2;filter:drop-shadow(0 3px 2px #0004)}
+.scale-road .tick{position:absolute;top:0;bottom:0;border-left:2px solid #fff;z-index:1}
+.scale-road .tick span{position:absolute;top:90px;left:0;transform:translateX(-50%);font-size:12px;color:var(--ink);white-space:nowrap;font-weight:700}
+@media(max-width:760px){.expedition-hero{grid-template-columns:1fr}.expedition-hero img{height:150px}.expedition-hero .guide img{height:90px}}
+
+header{background:#fff;border-bottom:1px solid var(--line);padding:18px 22px}
+.wrap{max-width:1120px;margin:auto}
+h1{margin:0;font-size:clamp(24px,4vw,34px);line-height:1.15}
+.sub{color:var(--muted);margin:7px 0 0}
+main{max-width:1120px;margin:20px auto;padding:0 16px 40px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 3px 12px #1e355008}
+h2{font-size:22px;margin:0 0 10px} h3{font-size:18px;margin:0 0 8px}
+p{margin:8px 0}
+.small{font-size:14px;color:var(--muted)}
+.stagebar{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:7px;margin-bottom:14px}
+.stagebtn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:10px 5px;cursor:pointer;font-size:13px;min-height:60px}
+.stagebtn.active{background:var(--blue2);border:2px solid var(--blue);color:var(--blue);font-weight:700}
+.stagebtn.done{border-color:#9ac9ae}
+button{font:inherit;cursor:pointer}
+.btn{border:0;border-radius:10px;background:var(--blue);color:white;padding:11px 16px;font-weight:650;min-height:44px}
+.btn.secondary{background:#edf2f7;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost{background:#fff;color:var(--blue);border:1px solid var(--blue)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.layout{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+.panel{background:#f8fafc;border:1px solid var(--line);border-radius:13px;padding:14px}
+label{display:block;font-weight:650;margin:9px 0 4px}
+input[type=number],select{width:100%;padding:10px 11px;border:1px solid #bccada;border-radius:9px;background:white;font:inherit;min-height:43px}
+input[type=range]{width:100%;accent-color:var(--blue)}
+.metricgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.metric{background:var(--blue2);padding:10px;border-radius:10px}
+.metric span{display:block;color:var(--muted);font-size:12px}
+.metric strong{font-size:21px}
+.road{height:145px;border-radius:12px;background:linear-gradient(#dff1ff 0 56%,#cce5b9 56%);position:relative;overflow:hidden;margin:12px 0}
+.road:after{content:"";position:absolute;left:0;right:0;bottom:20px;height:42px;background:#7c8791;border-top:4px solid #fff;border-bottom:4px solid #fff}
+.roadline{position:absolute;z-index:2;left:0;bottom:39px;width:0;height:4px;background:var(--gold);transition:width .25s}
+.vehicle{position:absolute;z-index:3;bottom:45px;left:0;transform:translateX(-50%);font-size:58px;line-height:1;transition:left .25s}
+.marker{position:absolute;z-index:2;bottom:65px;font-size:12px;color:#35495e}
+.feedback{padding:12px;border-radius:10px;background:#f0f5fa;border-left:4px solid var(--blue);margin-top:12px}
+.feedback.good{background:#edf8f1;border-color:var(--green)}
+.feedback.bad{background:#fff1f0;border-color:var(--red)}
+.tasklist{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.taskbtn{padding:8px 11px;border:1px solid var(--line);background:#fff;border-radius:9px}
+.taskbtn.active{border-color:var(--blue);background:var(--blue2);color:var(--blue);font-weight:700}
+.table{width:100%;border-collapse:collapse;margin:10px 0}
+.table th,.table td{border:1px solid var(--line);padding:9px;text-align:center}
+.table th{background:#f0f4f8}
+.answerrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;max-width:460px}
+.hidden{display:none!important}
+.progress{height:8px;background:#e7edf3;border-radius:99px;overflow:hidden;margin-top:8px}
+.progress>div{height:100%;background:#53a879;width:0;transition:width .2s}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:15px}
+@media(max-width:760px){.stagebar{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.metricgrid{grid-template-columns:repeat(3,1fr)}header{padding:16px}.stagebtn{min-height:48px}.card{padding:14px}}
+@media(max-width:380px){.metric strong{font-size:17px}.answerrow{grid-template-columns:1fr}}
+.formula-card{margin:14px 0;padding:13px 16px;border:2px solid #b9d9ef;border-radius:12px;background:#f0f8ff;color:#174c78;font-size:17px;line-height:1.7;text-align:center}
+.formula-card strong{display:block;font-size:15px;color:#315c78}
+.formula-card span{font-weight:750}
+ 
+.truth-card{margin-top:22px;border:2px solid #c9e1f4}
+.truth-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.truth-kicker{font-size:12px;letter-spacing:.12em;font-weight:800;color:#4380a8}
+.truth-counter{background:#eaf5fc;border-radius:999px;padding:8px 13px;font-size:13px;font-weight:750;color:#245b7d}
+.truth-content{margin-top:12px;padding:18px;border-radius:15px;background:linear-gradient(135deg,#f4faff,#fff)}
+.truth-question{font-size:21px;font-weight:750;line-height:1.4;min-height:70px;color:#183f5c}
+.truth-answers{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.truth-choice{min-width:130px}
+.truth-choice:disabled{opacity:.6;cursor:default}
+.truth-explanation{display:flex;align-items:center;gap:16px;padding:12px;margin:12px 0;border-radius:14px;background:#fff;border:1px solid #cfe3f2}
+.truth-explanation img{width:110px;height:130px;object-fit:contain;flex:0 0 auto}
+.truth-explanation strong{color:#1d628a;font-size:17px}
+.truth-explanation p{margin:5px 0 0}
+.truth-controls{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+@media(max-width:600px){.truth-question{font-size:18px}.truth-explanation{align-items:flex-start}.truth-explanation img{width:78px;height:100px}.truth-choice{flex:1}}
+
+/* VISUAL REDESIGN */
+:root{--navy:#06383d;--navy2:#0b4c50;--mint:#49dfbf;--mint2:#bdf8e9;--cream:#fffaf0;--paper:#fffdf8;--ink:#17343a;--muted:#5b7277;--line:#dce8e4;--gold:#f5c65b}
+body{background:#eaf2ef;color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;line-height:1.48}
+header{background:radial-gradient(ellipse at 75% 0%,#167078 0,#0a454a 42%,#052e34 100%);color:#fff;border:0;padding:14px 24px}
+header .wrap{max-width:1440px;padding:0}
+.brandline{display:flex;align-items:center;gap:14px}
+.brand-compass{width:52px;height:52px;flex:0 0 auto;filter:drop-shadow(0 4px 8px #001d2280)}
+h1{color:#fff;text-shadow:none;font-size:clamp(24px,3vw,34px);letter-spacing:-.035em}
+header .sub{color:#c9f3ea;margin:3px 0 0}
+main{max-width:1440px;margin:0 auto;padding:0 22px 36px;display:grid;grid-template-columns:250px minmax(0,1fr);gap:16px;align-items:start}
+.expedition-hero{grid-column:1/-1;position:relative;overflow:hidden;min-height:280px;margin:0;border:1px solid #23777a;border-radius:0 0 24px 24px;padding:26px 30px;background:linear-gradient(90deg,#052f35f5 0%,#06444be8 38%,#073e4480 64%,#073e4420 100%),url("expedition-map.jpg") center 48%/cover;box-shadow:0 14px 32px #06373a30}
+.expedition-hero>div{max-width:530px;position:relative;z-index:2}
+.expedition-hero .guide{display:flex;align-items:center;gap:15px;color:#fff;font-size:20px}
+.expedition-hero .guide .small{color:#d2f3eb;font-size:15px;line-height:1.5}
+.expedition-hero .guide img{width:105px;height:145px;object-fit:contain;filter:drop-shadow(0 7px 8px #001c2470)}
+.expedition-hero>img{display:none}
+main>section.card:nth-of-type(2){grid-column:1/-1;background:#0a4247;color:#fff;border:1px solid #23777a;border-radius:16px;padding:12px 18px;margin:0;box-shadow:0 8px 24px #052e3420}
+main>section.card:nth-of-type(2) .small{color:#c4e7e0}
+main>section.card:nth-of-type(2) .btn.secondary{background:#d7fff4;color:#064248;border:0}
+main>section.card:nth-of-type(2) .progress{background:#255e62}
+main>section.card:nth-of-type(2) .progress>div{background:linear-gradient(90deg,#35d7b4,#a0f2d8)}
+.stagebar{grid-column:1;grid-row:3;display:flex;flex-direction:column;gap:8px;position:sticky;top:12px;margin:0;padding:14px;background:#073d43;border:1px solid #1d7275;border-radius:18px;box-shadow:0 8px 24px #07363a20}
+.stagebtn{width:100%;text-align:left;min-height:56px;padding:10px 12px;background:#0d5055;border:1px solid #26777a;color:#e9fffa;border-radius:12px;font-size:14px}
+.stagebtn.active{background:linear-gradient(110deg,#62ebce,#b8f7e6);border:2px solid #b7fff0;color:#063d42}
+.stagebtn.done{background:#124e4b;color:#a9f1d7;border-color:#389d83}
+main>section.card:nth-of-type(3){grid-column:2;grid-row:3;background:var(--paper);border:1px solid #dbe6e0;border-radius:20px;padding:22px;box-shadow:0 12px 30px #143e3a12;margin:0;min-width:0}
+#stageTitle{font-size:clamp(22px,2.3vw,30px);color:#123d42;letter-spacing:-.025em;margin:0 0 5px}
+#stageIntro{color:#526c70;margin:0 0 12px}
+.tasklist{margin:10px 0 16px}
+.taskbtn{background:#f2f8f5;color:#27545a;border:1px solid #cfe2da;border-radius:999px;padding:8px 14px}
+.taskbtn.active{background:#c9f6e9;color:#07564d;border:1px solid #4bd3b0}
+.layout{grid-template-columns:minmax(0,1.45fr) minmax(210px,.65fr);gap:14px;align-items:stretch}
+.panel{background:#fff;border:1px solid #e1e9e3;border-radius:17px;padding:18px;box-shadow:0 4px 14px #1a46400b;min-width:0}
+.panel h3{font-size:19px;color:#124b4d}
+.panel p{font-size:16px;line-height:1.58}
+.task-scene{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(220px,.8fr);min-height:180px;margin:0 0 16px;border:1px solid #c9e3dc;border-radius:18px;overflow:hidden;background:#eff9f4}
+.scene-art{position:relative;min-height:180px;overflow:hidden;background:linear-gradient(#bfe6f7 0%,#e9f6ef 62%,#8dbf80 63%,#65a56b 100%)}
+.scene-sky{position:absolute;inset:0;background:radial-gradient(ellipse at 18% 25%,#fff9 0 7%,transparent 8%),radial-gradient(ellipse at 38% 19%,#fff9 0 9%,transparent 10%),linear-gradient(180deg,#c3e9f7,#f2f8e9 68%)}
+.scene-hills{position:absolute;left:0;right:0;bottom:34px;height:90px;background:linear-gradient(135deg,transparent 0 18%,#6b9f75 18% 33%,transparent 33%),linear-gradient(45deg,transparent 0 36%,#83b77e 36% 52%,transparent 52%),linear-gradient(120deg,transparent 0 60%,#5c936e 60% 76%,transparent 76%);opacity:.9}
+.scene-road{position:absolute;bottom:0;left:0;right:0;height:42px;background:#626e70;border-top:5px solid #f8f5e9}
+.scene-road:after{content:"";position:absolute;left:0;right:0;top:17px;border-top:4px dashed #fff4d7}
+.scene-object{position:absolute;z-index:2;bottom:17px;left:50%;transform:translateX(-50%);height:145px;width:70%;object-fit:contain;filter:drop-shadow(0 7px 5px #233c3340)}
+.scene-info{padding:18px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.scene-kicker{font-size:11px;letter-spacing:.13em;font-weight:850;color:#16836f}
+.scene-chips{display:flex;flex-wrap:wrap;gap:7px}
+.scene-chips span{padding:7px 11px;border-radius:999px;background:#fff;border:1px solid #b9e5d7;color:#124e4a;font-weight:800;font-size:14px;white-space:nowrap}
+.scene-info p{margin:0;color:#466367;font-size:14px;line-height:1.45}
+.formula-card{margin:14px 0;padding:15px 18px;border:1px solid #b7e7d6;border-radius:15px;background:linear-gradient(135deg,#e7fbf2,#f8fff9);color:#0d5148;font-size:19px;line-height:1.7;text-align:center}
+.formula-card strong{display:block;font-size:14px;color:#37796d;letter-spacing:.02em}
+.formula-card span{font-size:23px;font-weight:850;color:#073e3d}
+.metricgrid{gap:10px}
+.metric{background:#eff9f5;border:1px solid #d2eae0;padding:12px;border-radius:13px}
+.metric span{color:#567276;font-size:13px}
+.metric strong{font-size:22px;color:#124d4d}
+input[type=number],select{border:1.5px solid #b7d4ca;border-radius:11px;min-height:48px;padding:11px 13px;font-size:18px;color:#153e42}
+input:focus,select:focus{outline:3px solid #4dd9b633;border-color:#20a989}
+.btn{background:linear-gradient(120deg,#087c68,#13a984);border-radius:12px;padding:12px 18px;box-shadow:0 4px 0 #075e5140}
+.btn.secondary{background:#eef6f2;color:#174b4a;border:1px solid #c9ddd4;box-shadow:none}
+.btn.ghost{background:#fff;color:#087b68;border:1px solid #4bb99e;box-shadow:none}
+.feedback{border-radius:13px;background:#edf6f2;border-left:4px solid #199b7b;padding:14px;font-size:15px}
+.feedback.bad{background:#fff4ed;border-color:#e28a53}
+.answerrow{max-width:560px;grid-template-columns:minmax(0,1fr) auto;align-items:end}
+.trackbox{padding:16px;border-radius:16px;background:linear-gradient(#e4f5fb 0 44%,#d8ebc9 44% 100%);border:1px solid #c6e2d8}
+.track{height:96px;background:repeating-linear-gradient(90deg,#74838a 0 9.5%,#fff 9.5% 10%);border:5px solid #52676b;border-radius:13px}
+.track .rider{font-size:64px}
+.rider-image{position:absolute;bottom:-13px;transform:translateX(-50%);height:92px;width:116px;object-fit:contain;z-index:3;filter:drop-shadow(0 4px 3px #1c343333)}
+.track-labels{font-size:13px;color:#244e4e}
+.trackbox-large .track{height:125px}
+.trackbox-large .rider-image{height:120px;width:150px;bottom:-15px}
+.scale-road{height:84px;border-radius:14px}
+.scale-road .car{width:120px;height:88px;object-fit:contain}
+.road{height:170px;border-radius:16px}
+.vehicle{width:130px;height:100px;object-fit:contain}
+.free-car{bottom:43px}
+.truth-card{grid-column:2!important;grid-row:3!important;background:#fffdf8;border:1px solid #d9e8df;min-width:0;position:relative;z-index:2}
+.truth-content{background:#f2faf6;border:1px solid #d8eee3}
+.truth-question{color:#143e42;font-size:20px;font-weight:750;line-height:1.5}
+.truth-visual{margin:14px 0}
+.truth-road-scene{background:linear-gradient(#e9f7ff,#f4f8e9);border:1px solid #cfe4d8;border-radius:16px;padding:14px}
+.truth-road-caption{font-weight:800;color:#285c60;margin-bottom:8px}
+.truth-rider-row{display:flex;align-items:center;gap:14px;min-height:76px;border-bottom:2px dashed #9ab9aa;padding:4px 12px}
+.truth-rider-row img{height:70px;width:110px;object-fit:contain}
+.truth-rider-row span{font-weight:800;color:#315b5a}
+.truth-rider-row.ahead{padding-left:36%}
+.truth-gap{margin-top:10px;font-weight:850;color:#087b68;text-align:center}
+.distance-marker{font-size:14px;font-weight:850;text-align:center;color:#174b4a;margin-top:8px;background:#e9f7f1;padding:7px;border-radius:9px}
+.step-check{margin-top:10px}
+.truth-explanation{border-radius:14px}
+.truth-explanation img{object-fit:contain}
+.table{font-size:15px}
+.table th{background:#e8f5ef;color:#184e4b}
+.table td{background:#fff}
+footer{grid-column:1/-1;color:#607a79}
+.controls{gap:10px}
+button:focus-visible{outline:3px solid #f1bf4e;outline-offset:3px}
+@media(max-width:900px){
+ main{grid-template-columns:190px minmax(0,1fr);padding:0 14px 28px;gap:12px}
+ .stagebtn{font-size:12px;padding:9px}
+ .layout{grid-template-columns:1fr}
+ .task-scene{grid-template-columns:1fr 1fr}
+}
+@media(max-width:620px){
+ header{padding:12px 14px}
+ .brand-compass{width:42px;height:42px}
+ main{display:flex;flex-direction:column;padding:0 10px 24px;gap:10px}
+ .expedition-hero{width:100%;min-height:220px;padding:18px;background-position:58% center}
+ .expedition-hero .guide{font-size:18px;align-items:flex-start}
+ .expedition-hero .guide img{width:76px;height:112px}
+ main>section.card:nth-of-type(2){width:100%;padding:12px}
+ .stagebar{position:static;width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:10px;gap:7px}
+ .stagebtn{min-height:50px;font-size:12px;text-align:left}
+ main>section.card:nth-of-type(3){width:100%;padding:14px}
+ .task-scene{grid-template-columns:1fr;min-height:0}
+ .scene-art{min-height:170px}
+ .scene-object{height:138px;width:68%}
+ .scene-info{padding:12px 14px;gap:7px}
+ .scene-info p{font-size:13px}
+ .panel{padding:14px}
+ .panel h3{font-size:18px}
+ .panel p{font-size:15px}
+ .formula-card{font-size:17px;padding:12px}
+ .formula-card span{font-size:21px}
+ .metricgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .metric strong{font-size:19px}
+ .answerrow{grid-template-columns:1fr;max-width:none}
+ .answerrow .btn{width:100%}
+ .controls{width:100%}
+ .controls .btn{flex:1}
+ .truth-card{width:100%;grid-column:1!important;grid-row:auto!important}
+ .truth-explanation{align-items:flex-start}
+ .truth-explanation img{width:82px;height:100px}
+ .table{font-size:12px;display:block;overflow-x:auto;white-space:nowrap}
+ .trackbox{padding:10px}
+ .track-labels{font-size:10px}
+ .trackbox-large .rider-image{height:90px;width:108px}
+ .trackbox-large .track{height:102px}
+ .progressText{font-size:12px}
+}
+@media(max-width:390px){
+ body{font-size:15px}
+ h1{font-size:23px}
+ .expedition-hero{min-height:205px;padding:14px}
+ .expedition-hero .guide img{width:66px;height:98px}
+ .expedition-hero .guide .small{font-size:13px}
+ .stagebtn{font-size:11px;min-height:48px;padding:8px}
+ main>section.card:nth-of-type(3){padding:12px}
+ .scene-art{min-height:150px}
+ .scene-object{height:122px}
+ .scene-chips span{font-size:12px;padding:6px 9px}
+ .scene-info p{font-size:12px}
+ .metric{padding:9px}
+ .metric strong{font-size:17px}
+ .truth-question{font-size:17px}
+ .truth-explanation img{width:68px;height:88px}
+ .track-labels{font-size:9px}
+}
+
+
+.experiment-card{background:#fff;border:1px solid #dce9e2;border-radius:18px;overflow:hidden;box-shadow:0 6px 20px #163e3810}
+.experiment-heading{padding:18px 20px 12px;background:linear-gradient(110deg,#f0faf5,#fff)}
+.experiment-heading h3{font-size:22px;color:#123f43;margin:5px 0}
+.experiment-heading p{font-size:16px;color:#496568;margin:5px 0}
+.experiment-tag{display:inline-block;padding:5px 10px;border-radius:99px;background:#d8f7eb;color:#08745f;font-size:11px;font-weight:850;letter-spacing:.1em}
+.experiment-lanes{padding:10px 18px 4px;display:grid;gap:14px}
+.experiment-lane{padding:12px 14px;border:1px solid #d8e9e1;border-radius:15px;background:#fbfefa}
+.lane-title{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:#1b4b4b;font-size:14px}
+.lane-title span{font-weight:750;color:#087b68}
+.measured-track{height:105px;position:relative;margin:10px 0 2px;border-radius:12px;background:linear-gradient(#cceafa 0 56%,#d8ebca 56%);overflow:visible}
+.measured-track:after{content:"";position:absolute;left:0;right:0;bottom:10px;height:28px;background:#657478;border-top:3px solid #fff;border-bottom:3px solid #fff}
+.track-fill{position:absolute;z-index:1;bottom:10px;left:0;height:28px;background:#51c9a7;opacity:.8;border-top:3px solid #eafff7;border-bottom:3px solid #eafff7}
+.track-rider{position:absolute;z-index:3;bottom:16px;transform:translateX(-50%);height:82px;width:112px;object-fit:contain;filter:drop-shadow(0 4px 3px #203d3833)}
+.track-scale{position:absolute;left:0;right:0;bottom:-21px;display:flex;justify-content:space-between;color:#486367;font-size:11px;font-weight:750}
+.distance-result{margin-top:24px;color:#3c6260;font-size:14px}
+.distance-result b{font-size:18px;color:#075f51}
+.experiment-question{padding:14px 18px 18px;border-top:1px solid #e2eee8}
+.experiment-question p{font-size:17px;color:#173e42}
+.experiment-conclusion{margin:0 18px 18px;padding:13px 16px;border-radius:13px;background:#eaf8f1;border:1px solid #c7e8d9;color:#235b51;font-size:14px;line-height:1.5}
+.experiment-workspace{padding:14px 18px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(230px,.7fr);gap:14px}
+.experiment-visual{min-width:0}
+.road-sky{height:116px;position:relative;overflow:hidden;border-radius:14px 14px 0 0;background:linear-gradient(#bce5f6,#eaf7e9)}
+.cloud{position:absolute;width:90px;height:24px;background:#fff;border-radius:50px;top:25px;opacity:.8}
+.cloud:before,.cloud:after{content:"";position:absolute;background:#fff;border-radius:50%}
+.cloud:before{width:34px;height:34px;left:17px;top:-14px}.cloud:after{width:42px;height:39px;left:39px;top:-17px}
+.cloud-one{left:12%}.cloud-two{right:14%;top:45px;transform:scale(.8)}
+.hill{position:absolute;left:-4%;right:-4%;bottom:-38px;height:90px;background:#8cbd83;border-radius:50% 50% 0 0}
+.long-road{height:67px;position:relative;background:#657276;border-top:5px solid #f8fff8;border-bottom:5px solid #f8fff8;overflow:visible}
+.long-road:after{content:"";position:absolute;left:0;right:0;top:28px;border-top:4px dashed #fff4d8}
+.long-road-fill{position:absolute;z-index:1;left:0;top:0;bottom:0;width:40%;background:#4bd0aa66;transition:width .2s}
+.moving-car{position:absolute;z-index:3;left:40%;top:-57px;transform:translateX(-50%);height:105px;width:140px;object-fit:contain;transition:left .2s;filter:drop-shadow(0 5px 4px #213a3544)}
+.distance-scale{display:flex;justify-content:space-between;gap:3px;color:#3c5d60;font-size:11px;font-weight:750;padding:8px 0}
+.experiment-controls{background:#f5fbf7;border:1px solid #dcebe2;border-radius:14px;padding:14px}
+.experiment-controls label{font-size:15px;color:#33595a;margin:0 0 10px}
+.experiment-controls label strong{color:#087b68;font-size:18px}
+.experiment-controls input[type=range]{width:100%;margin:8px 0;accent-color:#119b7c}
+.range-steps{display:flex;justify-content:space-between;color:#607a78;font-size:10px;font-weight:700}
+.experiment-controls .metricgrid{grid-template-columns:1fr;gap:7px;margin-top:14px}
+.experiment-controls .metric{display:flex;justify-content:space-between;align-items:center;padding:8px 10px}
+.experiment-controls .metric span{font-size:13px}.experiment-controls .metric strong{font-size:17px}
+.experiment-conclusion strong{display:block;color:#16806d}
+.experiment-equation{font-size:26px;font-weight:900;text-align:center;color:#075e50;padding:5px}
+.experiment-conclusion p{margin:0}
+@media(max-width:620px){
+ .experiment-heading{padding:14px}
+ .experiment-heading h3{font-size:20px}
+ .experiment-lanes{padding:10px}
+ .experiment-lane{padding:10px}
+ .track-rider{width:90px;height:75px}
+ .experiment-workspace{grid-template-columns:1fr;padding:10px;gap:10px}
+ .road-sky{height:90px}
+ .moving-car{width:112px;height:88px;top:-48px}
+ .experiment-controls .metricgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .experiment-controls .metric{display:block;padding:8px 6px}
+ .experiment-controls .metric strong{font-size:15px}
+ .distance-scale{font-size:9px}
+}
+@media(max-width:390px){
+ .lane-title{font-size:12px}
+ .measured-track{height:91px}
+ .track-rider{height:68px;width:78px}
+ .track-scale{font-size:9px}
+ .distance-result{font-size:12px}
+ .distance-result b{font-size:16px}
+ .experiment-controls{padding:10px}
+ .experiment-controls .metric span{font-size:10px}
+ .experiment-controls .metric strong{font-size:13px}
+ .experiment-equation{font-size:23px}
+}
+
+
+#taskArea{min-width:0}
+.experiment-card{width:100%;max-width:100%;overflow:hidden}
+.experiment-heading p{max-width:760px;line-height:1.5}
+.experiment-lanes{gap:18px}
+.experiment-lane{min-width:0}
+.measured-track{margin-right:12px;margin-left:12px}
+.track-rider{max-width:100px}
+.experiment-question .controls{display:flex;flex-wrap:wrap}
+.experiment-question .controls .btn{min-width:120px}
+.experiment-workspace{grid-template-columns:minmax(0,1.5fr) minmax(250px,.7fr);align-items:center}
+.experiment-visual{min-width:0;padding:5px 8px 0}
+.long-road{margin:0 10px}
+.moving-car{max-width:clamp(90px,15vw,140px)}
+.distance-scale{padding-left:2px;padding-right:2px;font-size:12px}
+.experiment-controls .metricgrid{grid-template-columns:1fr}
+.experiment-controls .metric{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.experiment-controls .metric span{font-size:13px}
+.experiment-controls .metric strong{font-size:18px}
+header .brandline{min-width:0}
+header .brandline>div{min-width:0}
+.expedition-hero{min-height:220px}
+@media(max-width:900px){
+ .experiment-workspace{grid-template-columns:1fr}
+ .experiment-controls .metricgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .experiment-controls .metric{display:block;text-align:center;padding:9px 6px}
+}
+@media(max-width:620px){
+ .expedition-hero{min-height:170px;padding:14px}
+ .expedition-hero .guide{align-items:center;font-size:17px}
+ .expedition-hero .guide img{width:64px;height:90px}
+ .expedition-hero .guide .small{font-size:12px;line-height:1.35}
+ .experiment-heading{padding:15px 14px 10px}
+ .experiment-heading h3{font-size:20px;line-height:1.25}
+ .experiment-heading p{font-size:15px;line-height:1.45}
+ .experiment-lanes{padding:10px 12px;gap:13px}
+ .experiment-lane{padding:10px}
+ .lane-title{font-size:13px;line-height:1.35}
+ .measured-track{height:88px;margin:10px 6px 0}
+ .track-rider{height:68px;width:76px}
+ .track-scale{font-size:10px;bottom:-19px}
+ .distance-result{margin-top:23px;font-size:13px}
+ .distance-result b{font-size:17px}
+ .experiment-question{padding:12px 14px 14px}
+ .experiment-question p{font-size:16px;line-height:1.4}
+ .experiment-conclusion{margin:0 12px 12px;padding:11px 12px;font-size:13px;line-height:1.45}
+ .experiment-workspace{padding:10px 12px;gap:9px}
+ .road-sky{height:84px}
+ .long-road{height:58px;margin:0 7px}
+ .long-road:after{top:24px}
+ .moving-car{height:82px;width:106px;top:-44px}
+ .distance-scale{font-size:10px;letter-spacing:-.02em}
+ .experiment-controls{padding:11px}
+ .experiment-controls label{font-size:14px}
+ .experiment-controls label strong{font-size:17px}
+ .experiment-controls .metricgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+ .experiment-controls .metric{padding:8px 4px}
+ .experiment-controls .metric span{font-size:10px}
+ .experiment-controls .metric strong{font-size:14px;white-space:nowrap}
+ .range-steps{font-size:9px}
+ .experiment-equation{font-size:23px}
+}
+@media(max-width:390px){
+ main{padding-left:8px;padding-right:8px}
+ .expedition-hero{min-height:155px}
+ .stagebar{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .stagebtn{overflow-wrap:anywhere;line-height:1.25}
+ .experiment-lane{padding:9px 8px}
+ .lane-title{font-size:12px}
+ .track-rider{width:68px;height:64px}
+ .track-scale{font-size:9px}
+ .distance-scale{font-size:9px}
+ .experiment-controls .metric strong{font-size:12px}
+ .experiment-question .controls .btn{min-width:0;flex:1}
+}
+
+ 
+.task-with-formula{display:grid;grid-template-columns:minmax(0,1fr) 205px;gap:14px;align-items:start}
+.task-main-content{min-width:0}
+.formula-sidebar{position:sticky;top:12px;padding:15px 13px;border:1px solid #c6e5d8;border-radius:15px;background:linear-gradient(160deg,#f0fbf5,#fff);color:#174d45}
+.formula-sidebar-title{font-size:12px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:#16816b;margin-bottom:10px}
+.formula-sidebar-item{padding:10px 8px;border-radius:10px;background:#fff;border:1px solid #d9eee4;margin-top:8px;text-align:center}
+.formula-sidebar-item strong{display:block;font-size:19px;color:#08735e;line-height:1.35}
+.formula-sidebar-item span{display:block;font-size:11px;color:#58716a;margin-top:4px}
+.truth-card{display:block!important;width:100%;margin-top:24px;padding:20px;background:#fffdf8;border:1px solid #d9e8df;border-radius:18px;box-shadow:0 8px 24px #163e3810}
+.truth-card .truth-heading h2{color:#143e42;font-size:24px}
+.truth-card .truth-content{background:#f2faf6;border:1px solid #d8eee3}
+@media(max-width:760px){
+ .task-with-formula{grid-template-columns:1fr}
+ .formula-sidebar{position:static;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px}
+ .formula-sidebar-title{width:100%;margin:0}
+ .formula-sidebar-item{flex:1;min-width:120px;margin:0}
+ .formula-sidebar-item strong{font-size:17px}
+}
+@media(max-width:390px){
+ .truth-card{padding:12px}
+ .truth-card .truth-heading h2{font-size:20px}
+ .formula-sidebar-item{min-width:100px}
+ .formula-sidebar-item strong{font-size:15px}
+}
+ 
+.moving-car{transform:translateX(-50%)}
+.long-road{position:relative;overflow:visible}
+.long-road-fill{width:0}
+.simple-rule{display:block;text-align:left;padding:14px 18px}
+.simple-rule p{margin:5px 0;line-height:1.4}
+.experiment-slider-label{display:block;margin:12px 0 5px;font-weight:700}
+input[type="range"]{width:100%;accent-color:#16816b;cursor:pointer;touch-action:pan-y}
+input[type="range"]::-webkit-slider-thumb{cursor:grab}
+ 
+.definition-box{background:#f0f8f3;border-left:4px solid #2c9b76;border-radius:10px;padding:13px 16px;margin:12px 0 16px}
+.definition-box strong{display:block;color:#17694f;margin-bottom:5px}
+.definition-box p{margin:5px 0;line-height:1.5}
+.step-work{display:grid;gap:12px;margin:16px 0}
+.step-entry,.calculation-entry{padding:13px;border:1px solid #d9e8e1;border-radius:13px;background:#fbfefc;margin:10px 0}
+.step-entry>strong,.calculation-entry>strong{display:block;color:#174e43;line-height:1.4}
+.step-entry p,.calculation-entry p{margin:5px 0 10px;color:#526a62}
+.step-fields{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(90px,.45fr);gap:8px;align-items:center}
+.step-fields input{min-width:0;width:100%;padding:11px;border:1px solid #b8cec3;border-radius:9px;font:inherit;background:#fff}
+.step-fields input[type=number]{max-width:150px}
+
+.equation-cells{display:grid;grid-template-columns:minmax(54px,1fr) 22px minmax(54px,1fr) 22px minmax(54px,1fr) auto;gap:7px;align-items:center;margin-top:10px}
+.equation-cells input{width:100%;min-width:0;max-width:none;text-align:center;padding:9px 5px;font-size:18px;font-weight:700}
+.equation-cells span{text-align:center;font-size:20px;font-weight:850;color:#176b59}
+.equation-cells b{font-size:13px;color:#526a62;white-space:nowrap}
+@media(max-width:520px){.equation-cells{grid-template-columns:minmax(0,1fr) 16px minmax(0,1fr) 16px minmax(0,1fr);gap:4px}.equation-cells b{grid-column:1/-1;text-align:right}.equation-cells input{font-size:16px;padding:8px 3px}}
+
+.formula-line{font-size:20px;font-weight:750;line-height:1.8;letter-spacing:.02em;color:#165b4d}
+.formula-sidebar-item strong{line-height:1.6}
+@media(max-width:520px){.step-fields{grid-template-columns:minmax(0,1fr) 20px minmax(85px,.55fr)}.step-fields input{font-size:14px;padding:9px}.step-entry,.calculation-entry{padding:10px}}
+ 
+.stagebtn.truth-nav{background:#eaf6ef;border-color:#a8d5bb;color:#17694f;font-weight:800}
+.truth-card[hidden],#learningPanel[hidden]{display:none!important}
+@media(max-width:430px){.stagebar{grid-template-columns:repeat(2,minmax(0,1fr))}.stagebtn{min-height:48px}}
+
+.speed-range-steps{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:0;font-size:11px;text-align:center}.speed-range-unit{text-align:right;font-size:11px;margin-top:2px}
+/* First experiment: make the difference between the two journeys visible. */
+.live-comparison{margin:8px 18px 16px;padding:14px 16px;border:1px solid #c9e4d8;border-radius:13px;background:#f0faf5;color:#235b51}
+.live-comparison>strong{display:block;font-size:16px;color:#17694f}
+.live-comparison p{margin:5px 0 8px}
+.comparison-gap{display:inline-block;padding:6px 10px;border-radius:8px;background:#fff;font-weight:800;color:#145e50}
+/* Speed slider: align thumb centers exactly with all nine labels (20–100 by 10). */
+.experiment-controls input.speed-range-input{display:block;width:calc(100% - 18px);height:8px;margin:14px 9px 12px;padding:0;border:0;border-radius:99px;appearance:none;-webkit-appearance:none;background:linear-gradient(90deg,#119b7c,#a9d9ca);outline:none;touch-action:pan-y}
+.experiment-controls input.speed-range-input::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:19px;height:19px;border-radius:50%;background:#087b68;border:3px solid #fff;box-shadow:0 1px 5px #174c4044;cursor:grab}
+.experiment-controls input.speed-range-input::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:#087b68;border:3px solid #fff;box-shadow:0 1px 5px #174c4044;cursor:grab}
+.speed-range-steps{margin:0 1px;grid-template-columns:repeat(9,minmax(0,1fr));font-size:11px;line-height:1.4}
+.speed-range-steps span{position:relative;white-space:nowrap}
+.speed-range-steps span.active{color:#087b68;font-weight:900}
+.speed-range-steps span.active:before{content:"";position:absolute;left:50%;top:-7px;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#087b68}
+
+.road-position-marker{position:absolute;z-index:4;top:-5px;bottom:-5px;left:60%;width:2px;background:#ffd45c;box-shadow:0 0 0 1px #4c5b4c;transform:translateX(-50%);pointer-events:none}
+.road-position-marker:before{content:"";position:absolute;top:-5px;left:50%;transform:translateX(-50%);border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid #ffd45c}
+.moving-car{transform:translateX(-50%)}
+.walker-visual{margin:16px 0;padding:14px;background:#f0faf5;border:1px solid #cfe9dc;border-radius:14px}
+.walker-title{font-weight:800;color:#18584c;margin-bottom:10px}
+.walker-chunks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.walker-chunks>div{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 5px;background:#fff;border:1px solid #b9dfce;border-radius:10px;text-align:center}
+.walker-chunks b{font-size:17px;color:#087b68}.walker-chunks span{font-size:13px;color:#526a62}
+.walker-total{text-align:right;font-weight:850;color:#17584c;margin-top:9px}
+@media(max-width:480px){.walker-chunks{gap:4px}.walker-chunks>div{padding:9px 2px}.walker-chunks b{font-size:15px}.walker-chunks span{font-size:11px}}
+
+
+/* Стартовый экран: название, лозунг и место для вступительного видео */
+.brandline h1{font-size:clamp(25px,3.2vw,36px)}
+.expedition-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);gap:24px;align-items:center;min-height:330px;padding:28px 32px;background:linear-gradient(105deg,#052f35f5 0%,#06444be8 47%,#073e4480 100%),url("expedition-map.jpg") center/cover}
+.expedition-hero>div.hero-copy{max-width:650px}
+.expedition-hero .guide{align-items:center;margin-bottom:18px}
+.expedition-hero .guide img{width:92px;height:118px}
+.hero-title{font-size:clamp(25px,3vw,38px);line-height:1.12;font-weight:900;letter-spacing:-.03em;color:#fff;margin-top:8px}
+.hero-slogan{font-size:clamp(19px,2vw,25px);font-weight:800;color:#f5c65b;margin:8px 0 15px}
+.hero-facts{display:flex;flex-wrap:wrap;gap:8px}
+.hero-facts span{padding:7px 11px;border:1px solid #8bd9c477;background:#063d43a8;color:#eafff8;border-radius:999px;font-size:13px;font-weight:750}
+.intro-video{position:relative;z-index:2;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:14px;text-align:center;border:1px solid #a5e9d8;border-radius:18px;background:linear-gradient(145deg,#0b5358ed,#07363def);color:#fff;box-shadow:0 12px 28px #001f2550}
+.intro-video-frame{width:100%;overflow:hidden;border-radius:12px;background:#001d21;aspect-ratio:16/9}
+.intro-video video{display:block;width:100%;height:100%;object-fit:contain;background:#001d21}
+.intro-video strong{font-size:17px}
+.intro-video>span{font-size:14px;color:#d6f5ec}
+.intro-video small{font-size:12px;color:#ffd7a6;line-height:1.4}
+.intro-video small[hidden]{display:none}
+@media(max-width:760px){.expedition-hero{grid-template-columns:1fr;gap:16px;padding:20px 16px}.intro-video{min-height:0}.expedition-hero .guide img{width:72px;height:100px}}
+
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<div class="brandline"><svg class="brand-compass" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="27" fill="#0b3c42" stroke="#75e8d2" stroke-width="3"/><circle cx="32" cy="32" r="19" fill="none" stroke="#d7fff5" stroke-width="1.5" opacity=".65"/><path d="M39 12 34 31 25 52 30 33Z" fill="#52e2c4" stroke="#fff" stroke-width="1.5"/><path d="m39 12-9 21 9-2Z" fill="#f6c85e"/><circle cx="32" cy="32" r="3" fill="#fff"/></svg><div><h1>Экспедиция: Тайна скорости</h1><p class="sub">Готов раскрыть тайну скорости? Тогда отправляйся в экспедицию!</p></div></div>
+</div></header>
+<main>
+<section class="expedition-hero">
+ <div class="hero-copy">
+  <div class="guide"><img src="explorer-normal.png" alt="Юный исследователь"><div><strong>Привет, исследователь!</strong><div class="small">Тебя ждут эксперименты, загадки и открытия. Наблюдай, сравнивай, проверяй свои догадки — и шаг за шагом раскрой главную тайну!</div></div></div>
+  <div class="hero-title">Готов раскрыть тайну скорости?</div>
+  <p class="hero-slogan">Тогда отправляйся в экспедицию!</p>
+  <div class="hero-facts"><span>🧭 7 этапов</span><span>🔎 16 заданий</span><span>🚴 Большое открытие</span></div>
+ </div>
+ <div class="intro-video" id="introVideoBlock" aria-label="Вступительное видео экспедиции">
+  <div class="intro-video-frame">
+   <video id="introVideo" controls playsinline preload="metadata" poster="expedition-map.jpg" aria-label="Вступительное видео юного исследователя">
+    <source src="intro.mp4" type="video/mp4">
+    Твой браузер не поддерживает воспроизведение видео. Попробуй открыть сайт в другом браузере.
+   </video>
+  </div>
+  <strong>Видеообращение исследователя</strong>
+  <span id="introVideoStatus" role="status">Нажми ▶, чтобы начать экспедицию. Видео включится со звуком.</span>
+  <small id="introVideoError" hidden>Не удалось загрузить видео. Проверь, что файл intro.mp4 находится рядом с index.html.</small>
+ </div>
+ <img src="expedition-map.jpg" alt="Карта экспедиции с дорогами, мостом, лесом и маяком">
+</section>
+<section class="card">
+  <div class="controls" style="justify-content:space-between">
+    <div><strong id="modeTitle">Режим обучения</strong><div class="small" id="modeText">Решай задачи по материалам учебника и проверяй, как связаны скорость, путь и время.</div></div>
+    <button class="btn secondary" id="modeToggle">Свободная экспедиция</button>
+  </div>
+  <div class="progress"><div id="progressBar"></div></div>
+  <div class="small" id="progressText">Пройдено этапов: 0 из 7 · заданий: 0 из 16</div>
+</section>
+<nav class="stagebar" id="stagebar" aria-label="Этапы экспедиции"></nav>
+<section class="card" id="learningPanel">
+  <h2 id="stageTitle"></h2>
+  <p id="stageIntro"></p>
+  <div id="taskButtons" class="tasklist"></div>
+  <div id="taskArea"></div>
+  <div class="controls" style="justify-content:space-between;margin-top:16px">
+    <button class="btn secondary" id="resetBtn">↻ Начать эксперимент заново</button>
+    <div class="controls">
+      <button class="btn secondary" id="prevBtn">← Назад</button>
+      <button class="btn" id="nextBtn">Следующий этап →</button>
+    </div>
+  </div>
+</section>
+<section class="card truth-card" id="truthBlock" hidden>
+ <div class="truth-heading">
+  <div><span class="truth-kicker">ПРОВЕРЬ СЕБЯ</span><h2>Какие утверждения верны?</h2>
+  <p class="small">Отдельная проверка после заданий. Прочитай утверждение и выбери ответ. После каждого ответа мальчик объяснит свойство.</p></div>
+  <div class="truth-counter" id="truthCounter">Утверждение 1 из 6</div>
+ </div>
+ <div class="truth-content">
+  <div class="truth-question" id="truthQuestion"></div><div id="truthVisual" class="truth-visual" hidden></div>
+  <div class="truth-answers" id="truthAnswers">
+   <button class="btn truth-choice" data-answer="true">Верно</button>
+   <button class="btn secondary truth-choice" data-answer="false">Неверно</button>
+  </div>
+  <div class="truth-explanation" id="truthExplanation" hidden>
+   <img src="explorer-explaining.png" alt="Мальчик-исследователь объясняет" />
+   <div><strong id="truthVerdict"></strong><p id="truthText"></p></div>
+  </div>
+  <div class="truth-controls">
+   <span class="small" id="truthScore">Правильных ответов: 0 из 6</span>
+   <button class="btn" id="truthNext" disabled>Следующее утверждение →</button>
+  </div>
+ </div>
+</section>
+<footer>Учебная модель движения. Расчёты выполняются прямо в браузере. Открой файл index.html.</footer>
+</main>
+<script>
+"use strict";
+const stages = [
+ {title:"1. Знакомство с движением",intro:"Наблюдай за путешественниками. Скорость показывает, какое расстояние объект проходит за единицу времени.",tasks:["Кто движется быстрее?","Из чего складывается путь?"]},
+ {title:"2. Секрет скорости",intro:"Учись находить скорость по расстоянию и времени.",tasks:["Найди время","Найди скорость"]},
+ {title:"3. Единицы измерения скорости",intro:"Скорость можно измерять в километрах за час (км/ч) и метрах за секунду (м/с).",tasks:["Скорость автомобиля","Скорость бегуна","Найди пару","Выбери единицу"]},
+ {title:"4. Тайна средней скорости",intro:"Средняя скорость — это весь путь, разделённый на всё время движения.",tasks:["Что такое средняя скорость?","Сравни скорость автобуса и троллейбуса"]},
+ {title:"5. Три неизвестные",intro:"Если известны две величины, можно найти третью: расстояние, время или скорость.",tasks:["Автобус и время остановки","Пешеход идёт равномерно"]},
+ {title:"6. Карта расчётов",intro:"Заполняй таблицу. В каждой строке нужно определить, какая величина неизвестна.",tasks:["Найди пропущенные данные","Сравни бегунов"]},
+ {title:"7. Большая экспедиция",intro:"Решай задачи по образцу учебника: сравнивай пройденные пути и находи среднюю скорость всего маршрута.",tasks:["Движение велосипедистов в одном направлении","Средняя скорость маршрута"]}
+];
+let stage=0, task=0, freeMode=false, truthMode=false, completed=new Set(), completedTasks=new Set(), lastFeedback="";
+const taskKey=(s=stage,t=task)=>`${s}-${t}`;
+const $=id=>document.getElementById(id);
+// Scrolling the page over a focused number field must not silently change its value.
+document.addEventListener("wheel",e=>{
+ const el=e.target;
+ if(el instanceof HTMLInputElement && el.type==="number" && document.activeElement===el){
+  e.preventDefault();
+ }
+},{passive:false,capture:true});
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function stageTaskIndex(){return stage*10+task;}
+function renderNav(){
+ $("stagebar").innerHTML=stages.map((s,i)=>`<button class="stagebtn ${i===stage&&!truthMode?'active':''} ${completed.has(i)?'done':''}" data-stage="${i}" ${freeMode?'disabled':''}>${i+1}. ${esc(s.title.replace(/^\\d+\\. /,''))}${completed.has(i)?' ✓':''}</button>`).join("")+`<button class="stagebtn truth-nav ${truthMode?'active':''}" id="truthNav" ${freeMode?'disabled':''}>Проверка знаний</button>`;
+ document.querySelectorAll("[data-stage]").forEach(b=>b.addEventListener("click",()=>{if(freeMode)return;stage=+b.dataset.stage;task=0;render();}));
+ const truthNav=$("truthNav");if(truthNav)truthNav.onclick=()=>{if(freeMode)return;truthMode=true;$("learningPanel").hidden=true;$("truthBlock").hidden=false;$("truthBlock").scrollIntoView({behavior:"smooth",block:"start"});renderTruth();renderNav();};
+ $("progressBar").style.width=(completed.size/7*100)+"%";
+ $("progressText").textContent=`Пройдено этапов: ${completed.size} из 7 · заданий: ${completedTasks.size} из 16`;
+}
+function render(){
+ truthMode=false;$("learningPanel").hidden=false;$("truthBlock").hidden=true;
+ renderNav();
+ $("modeTitle").textContent=freeMode?"Свободная экспедиция":"Режим обучения";
+ $("modeText").textContent=freeMode?"Выбирай параметры путешествия самостоятельно и наблюдай за результатом.":"Решай задачи по материалам учебника и проверяй, как связаны скорость, путь и время.";
+ $("modeToggle").textContent=freeMode?"Вернуться к обучению":"Свободная экспедиция";
+ $("stageTitle").textContent=stages[stage].title;
+ $("stageIntro").textContent=stages[stage].intro;
+ $("taskButtons").innerHTML=stages[stage].tasks.map((t,i)=>`<button class="taskbtn ${i===task?'active':''}" data-task="${i}">${i+1}. ${esc(t)}</button>`).join("");
+ document.querySelectorAll("[data-task]").forEach(b=>b.addEventListener("click",()=>{task=+b.dataset.task;renderTask();}));
+ $("prevBtn").disabled=stage===0;$("nextBtn").disabled=stage===6;
+ renderTask();
+}
+function feedback(msg,type=""){return `<div class="feedback ${type}" role="status">${msg}</div>`;}
+function markComplete(){
+ completedTasks.add(taskKey());
+ const done=stages[stage].tasks.every((_,i)=>completedTasks.has(taskKey(stage,i)));
+ if(done) completed.add(stage);
+ renderNav();
+ $("progressText").textContent=`Пройдено этапов: ${completed.size} из 7 · заданий: ${completedTasks.size} из 16`;
+}
+function taskScene(){
+ const scenes = {
+  "0-0": {img:"cyclist-blue-clean.png",alt:"Велосипедист на дороге",chips:["v = 80 км/ч","t = 3 ч"],caption:"За каждый час велосипедист проезжает 80 километров."},
+  "0-1": {img:"explorer-normal.png",alt:"Юный исследователь",chips:["S = 15 км","v = 5 км/ч"],caption:"Пешеход проходит одинаковое расстояние за каждый час."},
+  "1-0": {img:"explorer-thinking.png",alt:"Юный исследователь размышляет",chips:["S = 200 м","v = 4 м/с"],caption:"Найди, сколько секунд длилось движение."},
+  "1-1": {img:"cyclist-pink-clean.png",alt:"Спортсменка на велосипеде",chips:["S = 150 м","t = 50 с"],caption:"Чтобы найти скорость, сравни путь и время."},
+  "2-0": {img:"car-red-clean.png",alt:"Красный автомобиль",chips:["120 км","за 1 час"],caption:"Для автомобиля обычно используют километры в час."},
+  "2-1": {img:"explorer-explaining.png",alt:"Юный исследователь объясняет",chips:["метры","за секунду"],caption:"Для бега удобно использовать метры в секунду."},
+  "2-2": {img:"car-red-clean.png",alt:"Красный автомобиль",chips:["80 километров","за 1 час"],caption:"Выбери правильную запись единицы скорости."},
+  "2-3": {img:"explorer-thinking.png",alt:"Юный исследователь размышляет",chips:["4 метра","за секунду"],caption:"Выбери правильную запись единицы скорости."},
+  "3-0": {img:"car-red-clean.png",alt:"Автомобиль на маршруте",chips:["S = 180 км","t = 2 ч"],caption:"Средняя скорость показывает, сколько километров в среднем приходится на один час всего путешествия."},
+  "3-1": {img:"explorer-normal.png",alt:"Юный исследователь",chips:["21 км/ч","18 км/ч","2 часа"],caption:"Сравни, какой путь проедет каждый транспорт за 2 часа."},
+  "4-0": {img:"car-red-clean.png",alt:"Автобусный маршрут",chips:["320 км","4 часа движения"],caption:"Не забудь исключить время остановки."},
+  "4-1": {img:"explorer-normal.png",alt:"Пешеход",chips:["2 км","30 минут"],caption:"Если скорость постоянная, во сколько раз увеличится время, во столько же раз увеличится путь."},
+  "5-0": {img:"car-red-clean.png",alt:"Разные виды транспорта",chips:["поезд","самолёт","корабль"],caption:"Вспомни три формулы: путь, скорость и время."},
+  "5-1": {img:"cyclist-pink-clean.png",alt:"Бегуны на дорожке",chips:["70 м за 10 с","30 м за 10 с"],caption:"Найди скорость каждого участника."},
+  "6-0": {img:"cyclist-blue-clean.png",alt:"Велосипедист на маршруте",chips:["11 км/ч","13 км/ч","25 км между городами"],caption:"Оба велосипедиста едут в одном направлении. Более быстрый стартует впереди."},
+  "6-1": {img:"cyclist-pink-clean.png",alt:"Велосипедист на длинном маршруте",chips:["107 км","6 км","12 км"],caption:"Сложи расстояния и время всех участков маршрута."}
+ };
+ const x=scenes[`${stage}-${task}`]||scenes["0-0"];
+ return `<section class="task-scene"><div class="scene-art"><div class="scene-sky"></div><div class="scene-hills"></div><div class="scene-road"></div><img src="${x.img}" alt="${x.alt}" class="scene-object"></div><div class="scene-info"><div class="scene-kicker">НАШЕ ЗАДАНИЕ</div><div class="scene-chips">${x.chips.map(c=>`<span>${c}</span>`).join("")}</div><p>${x.caption}</p></div></section>`;
+}
+function taskShell(content){
+ const formulas=[
+  ["S = v × t","Путь = скорость × время"],
+  ["t = S : v","Время = путь : скорость"],
+  ["v = S : t","Скорость = путь : время"],
+  ["v<sub>ср</sub> = S<sub>общ</sub> ÷ t<sub>общ</sub>","Средняя скорость = весь путь : всё время"],
+  ["S = v × t","t = S : v","v = S : t"]
+ ];
+ let f=stage===0?["S = v × t","Путь = скорость × время"]:stage===1?(task===0?["t = S : v","Время = путь : скорость"]:["v = S : t","Скорость = путь : время"]):stage===3?["v<sub>ср</sub> = S<sub>общ</sub> ÷ t<sub>общ</sub>","Весь путь : всё время"]:stage===4?["v<sub>ср</sub> = S<sub>общ</sub> ÷ t<sub>движения</sub>","Весь путь разделить на время движения"]:stage===5?["v = S : t","S = v × t","t = S : v"]:stage===6?["S = v × t","v<sub>ср</sub> = S<sub>общ</sub> ÷ t<sub>общ</sub>"]:["км/ч","м/с"];
+ const aside=`<aside class="formula-sidebar"><div class="formula-sidebar-title">Формула-помощник</div>${f.map((x,i)=>`<div class="formula-sidebar-item"><strong>${x}</strong>${i===0&&f.length===1?`<span>${stage===0?"Путь = скорость × время":stage===1?(task===0?"Время = путь : скорость":"Скорость = путь : время"):"Используй формулу для решения"}</span>`:""}</div>`).join("")}</aside>`;
+ $("taskArea").innerHTML=`<div class="task-with-formula"><div class="task-main-content">${content}</div>${aside}</div>`;
+}
+function renderTask(){
+ const key=`${stage}-${task}`;
+ if(stage===0) return task===0?task1():task2();
+ if(stage===1) return task===0?task3():task4();
+ if(stage===2) return task===0?unitTask(0):task===1?unitTask(1):task===2?unitTask(2):unitTask(3);
+ if(stage===3) return task===0?task5():task6();
+ if(stage===4) return task===0?task7():task8();
+ if(stage===5) return task===0?task9():task10();
+ if(stage===6) return task===0?task11():task12();
+}
+function task1(){
+ taskShell(`<div class="experiment-card">
+  <div class="experiment-heading"><span class="experiment-tag">ЭКСПЕРИМЕНТ 1</span><h3>Кто движется быстрее?</h3><p>Оба велосипедиста едут <strong>1 час</strong>. Меняй расстояние каждого и наблюдай, что происходит.</p></div>
+  <div class="experiment-lanes">
+   <div class="experiment-lane">
+    <div class="lane-title"><strong>Первый велосипедист</strong></div>
+    <div class="measured-track"><div class="track-fill" id="fillCyclist1" style="width:60%"></div><img src="cyclist-blue-clean.png" alt="Первый велосипедист" class="track-rider" id="rider1" style="left:60%"><div class="track-scale"><span>0 км</span><span>20 км</span><span>40 км</span><span>60 км</span><span>80 км</span><span>100 км</span></div></div>
+    <div class="distance-result">За 1 час первый велосипедист проехал: <b id="dist1">60 км</b></div>
+    <label class="experiment-slider-label" for="distance1">Измени расстояние первого велосипедиста</label><input id="distance1" type="range" min="0" max="100" step="10" value="60">
+   </div>
+   <div class="experiment-lane">
+    <div class="lane-title"><strong>Второй велосипедист</strong></div>
+    <div class="measured-track"><div class="track-fill" id="fillCyclist2" style="width:80%"></div><img src="cyclist-pink-clean.png" alt="Второй велосипедист" class="track-rider" id="rider2" style="left:80%"><div class="track-scale"><span>0 км</span><span>20 км</span><span>40 км</span><span>60 км</span><span>80 км</span><span>100 км</span></div></div>
+    <div class="distance-result">За 1 час второй велосипедист проехал: <b id="dist2">80 км</b></div>
+    <label class="experiment-slider-label" for="distance2">Измени расстояние второго велосипедиста</label><input id="distance2" type="range" min="0" max="100" step="10" value="80">
+   </div>
+  </div>
+  <div class="live-comparison" id="liveComparison" aria-live="polite"><strong>Сравниваем пройденный путь</strong><p>Пока оба велосипедиста проехали одинаковое время — 1 час.</p><div class="comparison-gap" id="comparisonGap">Разница между путями: 20 км</div></div>
+  <div class="experiment-question"><p><strong>Сравни:</strong> кто проехал больше за один час?</p><div class="controls"><button class="btn ghost" id="q1a">Первый велосипедист</button><button class="btn ghost" id="q1b">Второй велосипедист</button><button class="btn ghost" id="q1c">Проехали одинаково</button></div><div id="fb"></div></div>
+  <div class="experiment-conclusion simple-rule"><strong>Запомни!</strong><p>Сравниваем двух участников.</p><p>Время у них одинаковое.</p><p><b>Кто проехал больше — тот движется быстрее.</b></p></div>
+ </div>`);
+ const update=()=>{
+  const d1=Number($("distance1").value),d2=Number($("distance2").value);
+  [["1",d1],["2",d2]].forEach(([n,d])=>{
+   $("dist"+n).textContent=d+" км";
+   $("fillCyclist"+n).style.width=d+"%";
+   $("rider"+n).style.left=`${Math.max(3,Math.min(97,d))}%`;
+  });
+  const gap=Math.abs(d1-d2);
+  const message=d1===d2?"Оба велосипедиста проехали одинаковое расстояние за 1 час.":d1>d2?`Первый велосипедист проехал на ${gap} км больше.`:`Второй велосипедист проехал на ${gap} км больше.`;
+  $("liveComparison").querySelector("p").textContent=message;
+  $("comparisonGap").textContent=`Разница между путями: ${gap} км`;
+ };
+ $("distance1").oninput=update;$("distance2").oninput=update;update();
+ const choose=(which)=>{
+  const d1=+$("distance1").value,d2=+$("distance2").value;
+  const correct=d1===d2?which==="equal":(d1>d2?which==="first":which==="second");
+  $("fb").innerHTML=correct?feedback(d1===d2?"Верно! За одинаковое время велосипедисты проехали одинаковое расстояние. Их скорость одинаковая.":`Верно! За один час ${d1>d2?"первый":"второй"} велосипедист проехал больше. Значит, он движется быстрее.`,"good"):feedback("Сравни расстояния на дорожках. При одинаковом времени большее расстояние означает большую скорость.","bad");
+  if(correct)markComplete();
+ };
+ $("q1a").onclick=()=>choose("first");$("q1b").onclick=()=>choose("second");$("q1c").onclick=()=>choose("equal");
+}
+function task2(){
+ taskShell(`<div class="experiment-card">
+  <div class="experiment-heading"><span class="experiment-tag">ЭКСПЕРИМЕНТ 2</span><h3>Из чего складывается путь?</h3><p>Автомобиль едет с постоянной скоростью <strong>60 км/ч</strong>. Меняй время движения и наблюдай, как меняется расстояние.</p></div>
+  <div class="experiment-workspace">
+   <div class="experiment-visual">
+    <div class="road-sky"><span class="cloud cloud-one"></span><span class="cloud cloud-two"></span><span class="hill"></span></div>
+    <div class="long-road"><div class="long-road-fill" id="roadline"></div><img src="car-red-clean.png" alt="Автомобиль" id="car" class="moving-car" style="left:41%"></div>
+    <div class="distance-scale"><span>0 км</span><span>60 км</span><span>120 км</span><span>180 км</span><span>240 км</span><span>300 км</span></div>
+   </div>
+   <div class="experiment-controls">
+    <label for="timeRange">Время движения: <strong><span id="timeVal">2</span> ч</strong></label>
+    <input id="timeRange" type="range" min="1" max="5" step="1" value="2">
+    <div class="range-steps"><span>1 ч</span><span>2 ч</span><span>3 ч</span><span>4 ч</span><span>5 ч</span></div>
+    <div class="metricgrid">
+     <div class="metric"><span>Скорость</span><strong>60 км/ч</strong></div>
+     <div class="metric"><span>Время</span><strong id="t2">2 ч</strong></div>
+     <div class="metric"><span>Путь</span><strong id="d2">120 км</strong></div>
+    </div>
+   </div>
+  </div>
+  <div class="experiment-conclusion" id="explain2">За каждый час автомобиль проходит 60 км. Измени время и посмотри, как увеличится путь.</div>
+ </div>`);
+ const update=()=>{
+  const t=+$("timeRange").value,d=60*t,percent=d/300*100;
+  $("timeVal").textContent=t;$("t2").textContent=t+" ч";$("d2").textContent=d+" км";
+  $("car").style.left=Math.min(97,Math.max(3,percent))+"%";
+  $("roadline").style.width=percent+"%";
+  $("explain2").textContent=`За ${t} ч автомобиль проходит ${d} км: 60 × ${t} = ${d}. Чем дольше он едет с постоянной скоростью, тем больше путь.`;
+ };
+ $("timeRange").oninput=update;update();
+}
+function task3(){
+ taskShell(`<div class="layout"><div class="panel"><h3>Сколько времени бежала Алма?</h3><p>Алма пробежала 200 м со скоростью 4 м/с. Сколько секунд она бежала?</p>
+ <div class="metricgrid"><div class="metric"><span>Расстояние</span><strong>200 м</strong></div><div class="metric"><span>Скорость</span><strong>4 м/с</strong></div></div>
+ <div class="formula-card"><strong>Формула времени</strong>t = S : v<br><span>Раздели расстояние на скорость.</span></div>
+ <div class="answerrow"><div><label>Время, секунд</label><input id="a3" type="number"></div><button class="btn" id="check3">Проверить</button></div><div id="fb"></div></div>
+ <div class="panel"><h3>Запомни</h3><p>Чтобы найти время, раздели расстояние на скорость.</p></div></div>`);
+ $("check3").onclick=()=>{let v=+$("a3").value;$("fb").innerHTML=v===50?feedback("Верно! 200 м : 4 м/с = 50 секунд.","good"):feedback("Раздели расстояние 200 м на скорость 4 м/с.","bad");if(v===50)markComplete();};
+}
+
+function task4(){
+ taskShell(`<div class="experiment-card">
+  <div class="experiment-heading"><span class="experiment-tag">ЭКСПЕРИМЕНТ 3</span><h3>Измени скорость</h3><p>Автомобиль едет <strong>2 часа</strong>. Меняй скорость и наблюдай, как меняется пройденное расстояние.</p></div>
+  <div class="experiment-workspace">
+   <div class="experiment-visual">
+    <div class="road-sky"><span class="cloud cloud-one"></span><span class="cloud cloud-two"></span><span class="hill"></span></div>
+    <div class="long-road" id="road4"><div class="long-road-fill" id="line4"></div><div class="road-position-marker" id="position4" style="left:60%"></div><img src="car-red-clean.png" alt="Автомобиль" id="car4" class="moving-car" style="left:60%"></div>
+    <div class="distance-scale"><span>0 км</span><span>40 км</span><span>80 км</span><span>120 км</span><span>160 км</span><span>200 км</span></div><div class="distance-marker" id="marker4">Автомобиль проехал: 120 км</div>
+   </div>
+   <div class="experiment-controls">
+    <label for="speedRange">Скорость: <strong><span id="speedVal">60</span> км/ч</strong></label>
+    <input id="speedRange" class="speed-range-input" type="range" min="20" max="100" step="10" value="60" aria-label="Выбери скорость автомобиля от 20 до 100 километров в час">
+    <div class="range-steps speed-range-steps"><span data-speed-tick="20">20</span><span data-speed-tick="30">30</span><span data-speed-tick="40">40</span><span data-speed-tick="50">50</span><span data-speed-tick="60">60</span><span data-speed-tick="70">70</span><span data-speed-tick="80">80</span><span data-speed-tick="90">90</span><span data-speed-tick="100">100</span></div><div class="small speed-range-unit">км/ч</div>
+    <div class="metricgrid">
+     <div class="metric"><span>Скорость</span><strong id="s4">60 км/ч</strong></div>
+     <div class="metric"><span>Время</span><strong>2 ч</strong></div>
+     <div class="metric"><span>Путь</span><strong id="d4">120 км</strong></div>
+    </div>
+   </div>
+  </div>
+  <div class="experiment-conclusion"><strong>Математическая запись</strong><div id="calc4" class="experiment-equation">60 × 2 = 120 км</div><p id="exp4">При постоянном времени увеличение скорости увеличивает расстояние.</p></div>
+ </div>`);
+ const u=()=>{
+  const s=Number($("speedRange").value);
+  const d=s*2;
+  const percent=(d/200)*100;
+  $("speedVal").textContent=String(s);
+  document.querySelectorAll("[data-speed-tick]").forEach(tick=>tick.classList.toggle("active",Number(tick.dataset.speedTick)===s));
+  $("s4").textContent=`${s} км/ч`;
+  $("d4").textContent=`${d} км`;
+  $("calc4").textContent=`${s} × 2 = ${d} км`;
+  $("marker4").textContent=`Автомобиль проехал: ${d} км`;
+  // The road scale is 0–200 km, so 1% of the track represents 2 km.
+  ["car4","position4"].forEach(id=>$(id).style.left=`${percent}%`);
+  $("line4").style.width=`${percent}%`;
+  $("exp4").textContent=`За 2 часа при скорости ${s} км/ч автомобиль проходит ${d} км. На шкале это отметка ${d} км.`;
+ };
+ $("speedRange").addEventListener("input",u);$("speedRange").addEventListener("change",u);u();
+}
+function unitTask(n){
+ const data=[
+ ["Скорость автомобиля","Скорость показывает, какое расстояние автомобиль проходит за определённое время. Если за 1 час он проезжает 120 километров, его скорость — 120 километров за час.","Как записать такую скорость?","км/ч","Верно! км/ч — это километры за час.",["км/ч","м/с"]],
+ ["Скорость бегуна","Скорость показывает, какое расстояние бегун проходит за определённое время. Для коротких промежутков времени удобно использовать метры за секунду.","Какой единицей удобно записать скорость бегуна?","м/с","Верно! м/с — это метры за секунду.",["км/ч","м/с"]],
+ ["Выбери правильную запись","Скорость записывают вместе с единицами измерения. Например, километры за час обозначают км/ч.","Как правильно записать 80 километров за час?","80 км/ч","Правильно: 80 км/ч.",["80 км","80 км/ч","80 ч"]],
+ ["Выбери правильную запись","Метры за секунду обозначают сокращённо м/с.","Как правильно записать 4 метра за секунду?","4 м/с","Правильно: 4 м/с.",["4 м","4 м/с","4 с"]]
+ ][n];
+ taskShell(`<div class="panel"><h3>${data[0]}</h3><div class="definition-box"><strong>Запомни</strong><p>${data[1]}</p></div><p><strong>${data[2]}</strong></p><div class="controls" id="unitOptions">${data[5].map((v,i)=>`<button class="btn ghost" data-opt="${i}">${v}</button>`).join("")}</div><div id="fb"></div></div>`);
+ document.querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>{let v=data[5][+b.dataset.opt],ok=v===data[3];$("fb").innerHTML=ok?feedback(data[4],"good"):feedback("Вспомни обозначения: км/ч — километры за час, м/с — метры за секунду.","bad");if(ok)markComplete();});
+}
+
+function task5(){
+ taskShell(`<div class="layout"><div class="panel"><h3>Что такое средняя скорость?</h3><div class="definition-box"><strong>Простое объяснение</strong><p>Средняя скорость показывает, сколько километров в среднем проходил транспорт за каждый час всей поездки.</p><p>Чтобы её найти, нужно весь путь разделить на всё время поездки.</p></div><p>Автомобиль проехал 180 км за 2 часа. Найди его среднюю скорость.</p>
+ <div class="metricgrid"><div class="metric"><span>Весь путь</span><strong>180 км</strong></div><div class="metric"><span>Всё время</span><strong>2 ч</strong></div></div>
+ <div class="formula-card"><strong>Формула средней скорости</strong>v<sub>ср</sub> = S<sub>общ</sub> ÷ t<sub>общ</sub><br><span>Раздели весь путь на всё время.</span></div>
+ <div class="answerrow"><div><label>Средняя скорость, км/ч</label><input id="a5" type="number"></div><button class="btn" id="check5">Проверить</button></div><div id="fb"></div></div>
+ <div class="panel"><h3>Объяснение</h3><p>Чтобы найти среднюю скорость, раздели весь путь на всё время путешествия.</p></div></div>`);
+ $("check5").onclick=()=>{let v=+$("a5").value;$("fb").innerHTML=v===90?feedback("Верно! 180 км : 2 ч = 90 км/ч.","good"):feedback("Раздели весь путь 180 км на всё время — 2 часа.","bad");if(v===90)markComplete();};
+}
+
+function task6(){
+ taskShell(`<div class="panel"><h3>Автобус и троллейбус</h3><p>Средняя скорость автобуса — 21 км/ч, а троллейбуса — 18 км/ч. На сколько километров больше проедет автобус за 2 часа?</p>
+ <div class="metricgrid"><div class="metric"><span>Автобус</span><strong>21 км/ч</strong></div><div class="metric"><span>Троллейбус</span><strong>18 км/ч</strong></div><div class="metric"><span>Время</span><strong>2 ч</strong></div></div>
+ <div class="step-work">
+  <div class="step-entry"><strong>Шаг 1. Найди путь автобуса за 2 часа.</strong><p>Умножь скорость автобуса на время.</p><div class="equation-cells"><input id="a6n1" type="number" aria-label="Скорость автобуса"><span>×</span><input id="a6n2" type="number" aria-label="Время автобуса"><span>=</span><input id="a6r1" type="number" aria-label="Путь автобуса"><b>км</b></div></div>
+  <div class="step-entry"><strong>Шаг 2. Найди путь троллейбуса за 2 часа.</strong><p>Умножь скорость троллейбуса на время.</p><div class="equation-cells"><input id="a6n3" type="number" aria-label="Скорость троллейбуса"><span>×</span><input id="a6n4" type="number" aria-label="Время троллейбуса"><span>=</span><input id="a6r2" type="number" aria-label="Путь троллейбуса"><b>км</b></div></div>
+  <div class="step-entry"><strong>Шаг 3. На сколько километров путь автобуса больше?</strong><p>Из большего пути вычти меньший.</p><div class="equation-cells"><input id="a6n5" type="number" aria-label="Больший путь"><span>−</span><input id="a6n6" type="number" aria-label="Меньший путь"><span>=</span><input id="a6r3" type="number" aria-label="Разница путей"><b>км</b></div></div>
+ </div>
+ <button class="btn" id="check6">Проверить все шаги</button><div id="fb"></div>`);
+ const ids=["a6n1","a6n2","a6r1","a6n3","a6n4","a6r2","a6n5","a6n6","a6r3"];
+ const expected=[21,2,42,18,2,36,42,36,6];
+ $("check6").onclick=()=>{const ok=ids.every((id,i)=>$(id).value!==""&&+$(id).value===expected[i]);$("fb").innerHTML=ok?feedback("Все три вычисления верны! Автобус проедет на 6 км больше.","good"):feedback("Проверь каждую клеточку: скорость × время = путь. В последнем шаге вычти 36 км из 42 км.","bad");if(ok)markComplete();};
+}
+
+function task7(){
+ taskShell(`<div class="panel"><h3>Автобусная поездка</h3><p>Автобус выехал из Клайпеды в 11:00 и прибыл в Купишки в 16:00. Во время поездки он стоял на остановке 1 час. Автобус проехал 320 км. Найди его среднюю скорость во время движения.</p>
+ <div class="step-work">
+  <div class="step-entry"><strong>Шаг 1. Найди, сколько времени длилась вся поездка.</strong><p>Впиши время прибытия и время отправления, затем вычти.</p><div class="equation-cells"><input id="a7arrive" type="number" placeholder="Прибытие" aria-label="Время прибытия, часы"><span>−</span><input id="a7depart" type="number" placeholder="Отправление" aria-label="Время отправления, часы"><span>=</span><input id="a7time1" type="number" aria-label="Вся поездка, часы"><b>ч</b></div><button class="btn secondary step-check" id="check7step1">Проверить шаг 1</button><div id="fb7s1"></div></div>
+  <div class="step-entry"><strong>Шаг 2. Найди время движения автобуса.</strong><p>Из всего времени поездки вычти 1 час остановки.</p><div class="equation-cells"><input id="a7time1b" type="number" placeholder="Вся поездка" aria-label="Вся поездка, часы"><span>−</span><input id="a7stop" type="number" placeholder="Остановка" aria-label="Время остановки, часы"><span>=</span><input id="a7time2" type="number" aria-label="Время движения, часы"><b>ч</b></div><button class="btn secondary step-check" id="check7step2">Проверить шаг 2</button><div id="fb7s2"></div></div>
+  <div class="step-entry"><strong>Шаг 3. Найди среднюю скорость автобуса во время движения.</strong><p>Раздели весь путь — 320 км — на время движения.</p><div class="equation-cells"><input id="a7distance" type="number" placeholder="Путь" aria-label="Путь автобуса"><span>÷</span><input id="a7time2b" type="number" placeholder="Время" aria-label="Время движения"><span>=</span><input id="a7" type="number" aria-label="Средняя скорость"><b>км/ч</b></div><button class="btn secondary step-check" id="check7step3">Проверить шаг 3</button><div id="fb7s3"></div></div>
+ </div><div id="fb"></div>`);
+ const check=(n,ids,expected,msg)=>{const ok=ids.every((id,i)=>$(id).value!==''&&+$(id).value===expected[i]);$("fb7s"+n).innerHTML=ok?feedback(msg,"good"):feedback("Проверь числа и действие именно в этом шаге.","bad");return ok;};
+ $("check7step1").onclick=()=>check(1,["a7arrive","a7depart","a7time1"],[16,11,5],"Верно! Вся поездка длилась 5 часов.");
+ $("check7step2").onclick=()=>check(2,["a7time1b","a7stop","a7time2"],[5,1,4],"Верно! Автобус двигался 4 часа.");
+ $("check7step3").onclick=()=>{const ok=check(3,["a7distance","a7time2b","a7"],[320,4,80],"Верно! Средняя скорость во время движения — 80 км/ч.");if(ok)markComplete();};
+}
+
+function task8(){
+ taskShell(`<div class="panel"><h3>Пешеход идёт равномерно</h3>
+ <p>За полчаса пешеход прошёл 2 км. За сколько времени он пройдёт 8 км с такой же скоростью?</p>
+ <div class="definition-box"><strong>Сначала разберёмся, что такое полчаса</strong><p>Полчаса — это 30 минут. За каждые 30 минут пешеход проходит 2 км.</p></div>
+ <div class="walker-visual"><div class="walker-title">Один и тот же путь повторяется 4 раза</div><div class="walker-chunks"><div><b>2 км</b><span>30 мин</span></div><div><b>2 км</b><span>30 мин</span></div><div><b>2 км</b><span>30 мин</span></div><div><b>2 км</b><span>30 мин</span></div></div><div class="walker-total">Всего: 8 км</div></div>
+ <div class="step-work">
+  <div class="step-entry"><strong>Шаг 1. Во сколько раз 8 км больше 2 км?</strong><p>Раздели весь путь на путь за полчаса.</p><div class="equation-cells"><input id="a8n1" type="number" aria-label="Весь путь, километры"><span>÷</span><input id="a8n2" type="number" aria-label="Путь за полчаса, километры"><span>=</span><input id="a8r1" type="number" aria-label="Во сколько раз больше"><b>раза</b></div><button class="btn secondary step-check" id="check8s1">Проверить шаг 1</button><div id="fb8s1"></div></div>
+  <div class="step-entry"><strong>Шаг 2. Сколько минут понадобится на 8 км?</strong><p>Умножь 30 минут на количество таких отрезков.</p><div class="equation-cells"><input id="a8n3" type="number" aria-label="Минут за один отрезок"><span>×</span><input id="a8n4" type="number" aria-label="Количество отрезков"><span>=</span><input id="a8r2" type="number" aria-label="Время в минутах"><b>мин</b></div><button class="btn secondary step-check" id="check8s2">Проверить шаг 2</button><div id="fb8s2"></div></div>
+  <div class="step-entry"><strong>Шаг 3. Переведи минуты в часы.</strong><p>В одном часе 60 минут. Раздели минуты на 60.</p><div class="equation-cells"><input id="a8n5" type="number" aria-label="Время в минутах"><span>÷</span><input id="a8n6" type="number" aria-label="Минут в одном часе"><span>=</span><input id="a8r3" type="number" aria-label="Время в часах"><b>ч</b></div><button class="btn secondary step-check" id="check8s3">Проверить шаг 3</button><div id="fb8s3"></div></div>
+ </div><div class="small">Сначала заполни вычисления. Каждый шаг можно проверить отдельно.</div>`);
+ const steps=[
+  {ids:["a8n1","a8n2","a8r1"],values:[8,2,4],button:"check8s1",fb:"fb8s1",msg:"Верно! 8 км — это четыре отрезка по 2 км."},
+  {ids:["a8n3","a8n4","a8r2"],values:[30,4,120],button:"check8s2",fb:"fb8s2",msg:"Верно! На весь путь понадобится 120 минут."},
+  {ids:["a8n5","a8n6","a8r3"],values:[120,60,2],button:"check8s3",fb:"fb8s3",msg:"Верно! 120 минут — это 2 часа."}
+ ];
+ steps.forEach(st=>$(st.button).onclick=()=>{const ok=st.ids.every((id,i)=>$(id).value!==""&&Number($(id).value)===st.values[i]);$(st.fb).innerHTML=ok?feedback(st.msg,"good"):feedback("Проверь числа и действие в этом шаге. Вспомни: полчаса — это 30 минут.","bad");if(ok&&steps.every(x=>x.ids.every((id,i)=>$(id).value!==""&&Number($(id).value)===x.values[i])))markComplete();});
+}
+
+function task9(){
+ taskShell(`<div class="panel"><h3>Заполни таблицу о транспорте</h3><p>Найди неизвестную величину. Впиши каждое число в свою клеточку, затем запиши ответ.</p>
+ <table class="table"><tr><th>Транспорт</th><th>Скорость</th><th>Путь</th><th>Время</th></tr>
+ <tr><td>Пассажирский поезд</td><td>?</td><td>360 км</td><td>3 ч</td></tr><tr><td>Самолёт</td><td>880 км/ч</td><td>?</td><td>2 ч</td></tr><tr><td>Грузовой корабль</td><td>30 км/ч</td><td>300 км</td><td>?</td></tr></table>
+ <div class="calculation-entry"><strong>Пассажирский поезд — найди скорость.</strong><p>Путь раздели на время.</p><div class="equation-cells"><input id="a9n1" type="number" aria-label="Путь поезда"><span>÷</span><input id="a9n2" type="number" aria-label="Время поезда"><span>=</span><input id="a9r1" type="number" aria-label="Скорость поезда"><b>км/ч</b></div><button class="btn secondary" id="check9r1">Проверить строку 1</button><div id="fb9r1"></div></div>
+ <div class="calculation-entry"><strong>Самолёт — найди путь.</strong><p>Скорость умножь на время.</p><div class="equation-cells"><input id="a9n3" type="number" aria-label="Скорость самолёта"><span>×</span><input id="a9n4" type="number" aria-label="Время самолёта"><span>=</span><input id="a9r2" type="number" aria-label="Путь самолёта"><b>км</b></div><button class="btn secondary" id="check9r2">Проверить строку 2</button><div id="fb9r2"></div></div>
+ <div class="calculation-entry"><strong>Грузовой корабль — найди время.</strong><p>Путь раздели на скорость.</p><div class="equation-cells"><input id="a9n5" type="number" aria-label="Путь корабля"><span>÷</span><input id="a9n6" type="number" aria-label="Скорость корабля"><span>=</span><input id="a9r3" type="number" aria-label="Время корабля"><b>ч</b></div><button class="btn secondary" id="check9r3">Проверить строку 3</button><div id="fb9r3"></div></div>
+ <div class="formula-card"><strong>Формулы-помощники</strong><div class="formula-line">v = S ÷ t</div><div class="formula-line">S = v × t</div><div class="formula-line">t = S ÷ v</div></div>
+ <div class="small">Проверяй каждую строку отдельно. После трёх правильных строк задание будет засчитано.</div>`);
+ const rows=[
+  {ids:["a9n1","a9n2","a9r1"],values:[360,3,120],fb:"fb9r1",button:"check9r1",label:"Строка 1 верна! Скорость поезда — 120 км/ч."},
+  {ids:["a9n3","a9n4","a9r2"],values:[880,2,1760],fb:"fb9r2",button:"check9r2",label:"Строка 2 верна! Самолёт пролетел 1760 км."},
+  {ids:["a9n5","a9n6","a9r3"],values:[300,30,10],fb:"fb9r3",button:"check9r3",label:"Строка 3 верна! Корабль был в пути 10 часов."}
+ ];
+ rows.forEach((r,i)=>$(r.button).onclick=()=>{const ok=r.ids.every((id,j)=>$(id).value!==""&&+$(id).value===r.values[j]);$(r.fb).innerHTML=ok?feedback(r.label,"good"):feedback("Проверь только эту строку: числа, знак действия и ответ.","bad");if(ok&&rows.every(x=>x.ids.every((id,j)=>$(id).value!==""&&+$(id).value===x.values[j])))markComplete();});
+}
+
+function task10(){
+ taskShell(`<div class="panel"><h3>Сравни Марту и Каюса</h3><p>Марта пробежала 70 м за 10 секунд. Каюс за те же 10 секунд пробежал 30 м. Найди скорость каждого.</p>
+ <div class="formula-card"><strong>Формула скорости</strong><div class="formula-line">v = S ÷ t</div><p>Чтобы найти скорость, раздели расстояние на время.</p></div>
+ <div class="calculation-entry"><strong>Марта</strong><p>Запиши, как ты находишь её скорость.</p><div class="step-fields"><input id="a10worka" type="text" placeholder="Твоё вычисление"><span>=</span><input id="a10a" type="number" placeholder="м/с"></div></div>
+ <div class="calculation-entry"><strong>Каюс</strong><p>Запиши, как ты находишь его скорость.</p><div class="step-fields"><input id="a10workb" type="text" placeholder="Твоё вычисление"><span>=</span><input id="a10b" type="number" placeholder="м/с"></div></div>
+ <button class="btn" id="check10">Проверить</button><div id="fb"></div>`);
+ $("check10").onclick=()=>{let a=+$("a10a").value,b=+$("a10b").value,ok=a===7&&b===3;$("fb").innerHTML=ok?feedback("Правильно! Скорость Марты — 7 м/с, Каюса — 3 м/с.","good"):feedback("Раздели расстояние каждого ребёнка на 10 секунд. Не забудь записать вычисление.","bad");if(ok)markComplete();};
+}
+function task11(){
+ taskShell(`<div class="panel"><h3>Два велосипедиста едут в одном направлении</h3>
+ <p>Между Неменчине и Пабраде — 25 км. Одновременно из Неменчине в сторону Адутишкиса выехал велосипедист со скоростью 11 км/ч, а из Пабраде в том же направлении — велосипедист со скоростью 13 км/ч. Какое расстояние будет между ними через 4 часа?</p>
+ <div class="trackbox trackbox-large"><div class="lane"><strong>Оба велосипедиста едут в сторону Адутишкиса →</strong><div class="track" style="height:76px"><img class="rider rider-image" style="left:25%" src="cyclist-blue-clean.png" alt="Велосипедист из Неменчине"><img class="rider rider-image" style="left:72%" src="cyclist-pink-clean.png" alt="Велосипедист из Пабраде"></div><div class="track-labels"><span>Неменчине</span><span>Пабраде · 25 км</span><span>Адутишкис</span></div></div></div>
+ <div class="step-work">
+  <div class="step-entry"><strong>Шаг 1. Найди путь первого велосипедиста.</strong><p>Скорость — 11 км/ч. Умножь её на 4 часа.</p><div class="equation-cells"><input id="a11n1" type="number" aria-label="Скорость первого велосипедиста"><span>×</span><input id="a11n2" type="number" aria-label="Время первого велосипедиста"><span>=</span><input id="a11r1" type="number" aria-label="Путь первого велосипедиста"><b>км</b></div><button class="btn secondary step-check" id="check11s1">Проверить шаг 1</button><div id="fb11s1"></div></div>
+  <div class="step-entry"><strong>Шаг 2. Найди путь второго велосипедиста.</strong><p>Скорость — 13 км/ч. Умножь её на 4 часа.</p><div class="equation-cells"><input id="a11n3" type="number" aria-label="Скорость второго велосипедиста"><span>×</span><input id="a11n4" type="number" aria-label="Время второго велосипедиста"><span>=</span><input id="a11r2" type="number" aria-label="Путь второго велосипедиста"><b>км</b></div><button class="btn secondary step-check" id="check11s2">Проверить шаг 2</button><div id="fb11s2"></div></div>
+  <div class="step-entry"><strong>Шаг 3. Узнай, на сколько километров второй проедет больше.</strong><p>Из большего пути вычти меньший.</p><div class="equation-cells"><input id="a11n5" type="number" aria-label="Больший путь"><span>−</span><input id="a11n6" type="number" aria-label="Меньший путь"><span>=</span><input id="a11r3" type="number" aria-label="Разница путей"><b>км</b></div><button class="btn secondary step-check" id="check11s3">Проверить шаг 3</button><div id="fb11s3"></div></div>
+  <div class="step-entry"><strong>Шаг 4. Найди расстояние между ними.</strong><p>К начальным 25 км прибавь разницу путей.</p><div class="equation-cells"><input id="a11n7" type="number" aria-label="Начальное расстояние"><span>+</span><input id="a11n8" type="number" aria-label="Разница путей"><span>=</span><input id="a11r4" type="number" aria-label="Расстояние между велосипедистами"><b>км</b></div><button class="btn secondary step-check" id="check11s4">Проверить шаг 4</button><div id="fb11s4"></div></div>
+ </div><div id="fb"></div>`);
+ const steps=[
+  {ids:["a11n1","a11n2","a11r1"],values:[11,4,44],button:"check11s1",fb:"fb11s1",msg:"Верно! Первый велосипедист проехал 44 км."},
+  {ids:["a11n3","a11n4","a11r2"],values:[13,4,52],button:"check11s2",fb:"fb11s2",msg:"Верно! Второй велосипедист проехал 52 км."},
+  {ids:["a11n5","a11n6","a11r3"],values:[52,44,8],button:"check11s3",fb:"fb11s3",msg:"Верно! Разница путей — 8 км."},
+  {ids:["a11n7","a11n8","a11r4"],values:[25,8,33],button:"check11s4",fb:"fb11s4",msg:"Верно! Через 4 часа между ними будет 33 км."}
+ ];
+ steps.forEach((st,i)=>$(st.button).onclick=()=>{const ok=st.ids.every((id,j)=>$(id).value!==""&&+$(id).value===st.values[j]);$(st.fb).innerHTML=ok?feedback(st.msg,"good"):feedback("Проверь числа и знак действия в этом шаге.","bad");if(ok&&steps.every(x=>x.ids.every((id,j)=>$(id).value!==""&&+$(id).value===x.values[j])))markComplete();});
+}
+
+function task12(){
+ taskShell(`<div class="panel"><h3>Найди среднюю скорость велосипедиста</h3><p>Маршрут велосипедиста состоит из трёх участков:</p>
+ <table class="table"><tr><th>Участок</th><th>Путь</th><th>Время</th></tr><tr><td>1</td><td>107 км</td><td>4 ч</td></tr><tr><td>2</td><td>6 км</td><td>30 мин</td></tr><tr><td>3</td><td>12 км</td><td>30 мин</td></tr></table>
+ <div class="step-work">
+  <div class="step-entry"><strong>Шаг 1. Найди весь путь.</strong><p>Сложи расстояния всех трёх участков.</p><div class="formula-line">107 + 6 + 12 = ? км</div><div class="answerrow"><div><label for="a12r1">Весь путь, км</label><input id="a12r1" type="number"></div><button class="btn secondary step-check" id="check12s1">Проверить шаг 1</button></div><div id="fb12s1"></div></div>
+  <div class="step-entry"><strong>Шаг 2. Найди всё время.</strong><p>Сложи время всех участков. Помни: 30 мин + 30 мин = 60 мин = 1 ч.</p><div class="formula-line">4 ч + 1 ч = ? ч</div><div class="answerrow"><div><label for="a12r2">Всё время, ч</label><input id="a12r2" type="number"></div><button class="btn secondary step-check" id="check12s2">Проверить шаг 2</button></div><div id="fb12s2"></div></div>
+  <div class="step-entry"><strong>Шаг 3. Найди среднюю скорость.</strong><p>Раздели весь путь на всё время.</p><div class="formula-line">125 : 5 = ? км/ч</div><div class="answerrow"><div><label for="a12r3">Средняя скорость, км/ч</label><input id="a12r3" type="number"></div><button class="btn secondary step-check" id="check12s3">Проверить шаг 3</button></div><div id="fb12s3"></div></div>
+ </div><div id="fb"></div>`);
+ const steps=[
+  {id:"a12r1",value:125,button:"check12s1",fb:"fb12s1",msg:"Верно! Весь путь: 107 + 6 + 12 = 125 км."},
+  {id:"a12r2",value:5,button:"check12s2",fb:"fb12s2",msg:"Верно! 30 мин + 30 мин = 1 ч. Всё время: 4 + 1 = 5 ч."},
+  {id:"a12r3",value:25,button:"check12s3",fb:"fb12s3",msg:"Правильно! 125 км : 5 ч = 25 км/ч."}
+ ];
+ const checked=new Set();
+ steps.forEach((st,i)=>$(st.button).onclick=()=>{
+  const ok=$(st.id).value!==""&&+$(st.id).value===st.value;
+  $(st.fb).innerHTML=ok?feedback(st.msg,"good"):feedback(i===0?"Сложи 107 км, 6 км и 12 км.":i===1?"Переведи 30 минут + 30 минут в часы, затем прибавь 4 часа.":"Раздели весь путь на всё время.","bad");
+  if(ok)checked.add(i);else checked.delete(i);
+  if(checked.size===3)markComplete();
+ });
+}
+
+function resetTask(){renderTask();}
+$("resetBtn").onclick=resetTask;
+$("prevBtn").onclick=()=>{if(stage>0){stage--;task=0;render();}};
+$("nextBtn").onclick=()=>{if(stage<6){stage++;task=0;render();}};
+$("modeToggle").onclick=()=>{
+ freeMode=!freeMode;
+ if(freeMode){renderFree();}
+ else{render();}
+};
+function renderFree(){
+ truthMode=false;
+ $("learningPanel").hidden=false;
+ $("truthBlock").hidden=true;
+ renderNav();
+ $("modeTitle").textContent="Свободная экспедиция";
+ $("modeText").textContent="Выбирай скорость и время самостоятельно. Путешествие пересчитывается сразу.";
+ $("modeToggle").textContent="Вернуться к обучению";
+ $("stageTitle").textContent="Свободное путешествие";
+ $("stageIntro").textContent="Выбери параметры автомобиля. Измени скорость или время и наблюдай, как меняется пройденный путь.";
+ $("taskButtons").innerHTML="";
+ $("taskArea").innerHTML=`<div class="task-with-formula"><div class="task-main-content"><div class="layout"><div class="panel"><h3>Маршрут путешественника</h3><label for="fs">Скорость: <b id="fsval">60</b> км/ч</label><input id="fs" type="range" min="10" max="120" step="5" value="60"><label for="ft">Время: <b id="ftval">2</b> ч</label><input id="ft" type="range" min="1" max="8" step="1" value="2"><div class="road"><img class="vehicle free-car" id="fcar" src="car-red-clean.png" alt="Автомобиль"><div class="roadline" id="fline"></div></div><div class="metricgrid"><div class="metric"><span>Скорость</span><strong id="fsv">60 км/ч</strong></div><div class="metric"><span>Время</span><strong id="ftv">2 ч</strong></div><div class="metric"><span>Расстояние</span><strong id="fdv">120 км</strong></div></div></div><div class="panel"><h3>Математическая запись</h3><div id="fcalc" style="font-size:24px;font-weight:750;text-align:center;padding:18px">60 × 2 = 120 км</div><p id="fexp">Измени параметры и посмотри, как изменится путь.</p><button class="btn secondary" id="freeReset" type="button">Сбросить параметры</button></div></div></div><aside class="formula-sidebar"><div class="formula-sidebar-title">Формула-помощник</div><div class="formula-sidebar-item"><strong>S = v × t</strong><span>Путь = скорость × время</span></div></aside></div>`;
+ const updateFreeJourney=()=>{
+  const speed=Number($("fs").value);
+  const time=Number($("ft").value);
+  const distance=speed*time;
+  $("fsval").textContent=speed;
+  $("ftval").textContent=time;
+  $("fsv").textContent=speed+" км/ч";
+  $("ftv").textContent=time+" ч";
+  $("fdv").textContent=distance+" км";
+  $("fcalc").textContent=`${speed} × ${time} = ${distance} км`;
+  $("fcar").style.left=Math.min(95,5+distance/960*90)+"%";
+  $("fline").style.width=Math.min(90,distance/960*90)+"%";
+  $("fexp").textContent=`При скорости ${speed} км/ч за ${time} ч автомобиль проходит ${distance} км.`;
+ };
+ $("fs").addEventListener("input",updateFreeJourney);
+ $("ft").addEventListener("input",updateFreeJourney);
+ $("freeReset").addEventListener("click",()=>{
+  $("fs").value=60;
+  $("ft").value=2;
+  updateFreeJourney();
+ });
+ $("prevBtn").disabled=true;
+ $("nextBtn").disabled=true;
+ $("resetBtn").onclick=renderFree;
+}
+
+const truthStatements=[
+ {text:"Чтобы найти пройденный путь, нужно скорость умножить на время.",answer:true,explain:"Верно! В учебнике показано: путь = скорость × время. Например, 80 км/ч × 3 ч = 240 км."},
+ {text:"Чтобы найти время, нужно расстояние разделить на скорость.",answer:true,explain:"Верно! Например, 15 км : 5 км/ч = 3 часа."},
+ {text:"Скорость можно измерять в километрах в час (км/ч) и метрах в секунду (м/с).",answer:true,explain:"Верно! В учебнике приведены обе единицы: км/ч и м/с."},
+ {text:"Среднюю скорость всего путешествия находят, разделив весь путь на всё время движения.",answer:true,explain:"Верно! Нужно сложить путь всех участков и разделить его на общее время. Например, 180 км : 2 ч = 90 км/ч."},
+ {text:"Чтобы найти среднюю скорость, достаточно сложить скорости на отдельных участках и разделить на их количество.",answer:false,explain:"Неверно. Нужно найти весь путь и всё время путешествия, а затем разделить общий путь на общее время."},
+ {text:"Если два велосипедиста едут в одном направлении, расстояние между ними всегда уменьшается.",answer:false,visual:"same-direction",explain:"Неверно. Посмотри на рисунок: оба едут в одну сторону, но передний велосипедист движется быстрее. Поэтому он постепенно уезжает дальше, и расстояние между ними увеличивается."}
+]
+let truthIndex=0,truthCorrect=0,truthAnswered=false;
+function renderTruth(){
+ const item=truthStatements[truthIndex];
+ $("truthCounter").textContent=`Утверждение ${truthIndex+1} из ${truthStatements.length}`;
+ $("truthQuestion").textContent=item.text;
+ const tv=$("truthVisual");if(item.visual==="same-direction"){tv.hidden=false;tv.innerHTML=`<div class="truth-road-scene"><div class="truth-road-caption">Оба велосипедиста едут в одном направлении →</div><div class="truth-rider-row"><img src="cyclist-blue-clean.png" alt="Велосипедист позади"><span>11 км/ч</span></div><div class="truth-rider-row ahead"><img src="cyclist-pink-clean.png" alt="Велосипедист впереди"><span>13 км/ч</span></div><div class="truth-gap">Начальное расстояние — 25 км</div></div>`;}else{tv.hidden=true;tv.innerHTML="";}
+ $("truthAnswers").querySelectorAll("button").forEach(b=>{b.disabled=false;b.classList.remove("active");});
+ $("truthExplanation").hidden=true;
+ $("truthNext").disabled=true;
+ $("truthNext").textContent=truthIndex===truthStatements.length-1?"Посмотреть результат":"Следующее утверждение →";
+ truthAnswered=false;
+ $("truthScore").textContent=`Правильных ответов: ${truthCorrect} из ${truthStatements.length}`;
+}
+function truthAnswerHandler(e){
+ const b=e.target.closest("[data-answer]");
+ if(!b||truthAnswered)return;
+ truthAnswered=true;
+ const selected=b.dataset.answer==="true";
+ const item=truthStatements[truthIndex];
+ const correct=selected===item.answer;
+ if(correct)truthCorrect++;
+ $("truthAnswers").querySelectorAll("button").forEach(x=>x.disabled=true);
+ $("truthVerdict").textContent=correct?"Правильно! Молодец!":"Давай разберёмся вместе.";
+ $("truthText").textContent=item.explain;
+ $("truthExplanation").hidden=false;
+ $("truthScore").textContent=`Правильных ответов: ${truthCorrect} из ${truthStatements.length}`;
+ $("truthNext").disabled=false;
+}
+$("truthAnswers").addEventListener("click",truthAnswerHandler);
+$("truthNext").addEventListener("click",()=>{
+ if(truthIndex<truthStatements.length-1){truthIndex++;renderTruth();}
+ else{
+  $("truthCounter").textContent="Результат";
+  $("truthQuestion").textContent=`Ты ответил(а) правильно на ${truthCorrect} из ${truthStatements.length} утверждений!`;
+  $("truthAnswers").innerHTML='<button class="btn" id="truthAgain">Пройти ещё раз</button>';
+  $("truthExplanation").hidden=false;
+  $("truthVerdict").textContent="Экспедиция завершена!";
+  $("truthText").textContent="Повтори свойства скорости и попробуй улучшить свой результат.";
+  $("truthNext").disabled=true;
+  $("truthScore").textContent=`Итог: ${truthCorrect} из ${truthStatements.length}`;
+  $("truthAgain").onclick=()=>{truthIndex=0;truthCorrect=0;$("truthAnswers").innerHTML='<button class="btn truth-choice" data-answer="true">Верно</button><button class="btn secondary truth-choice" data-answer="false">Неверно</button>';$("truthAnswers").querySelectorAll("button").forEach(b=>b.addEventListener("click",truthAnswerHandler));renderTruth();};
+ }
+});
+
+const introVideo=$("introVideo");
+const introVideoError=$("introVideoError");
+const introVideoStatus=$("introVideoStatus");
+introVideo.addEventListener("error",()=>{
+ introVideoError.hidden=false;
+ introVideoStatus.textContent="Вступительное видео сейчас недоступно.";
+});
+introVideo.addEventListener("playing",()=>{
+ introVideoStatus.textContent="Смотри видео и слушай обращение исследователя!";
+ introVideoError.hidden=true;
+});
+introVideo.addEventListener("ended",()=>{
+ introVideoStatus.textContent="Отлично! Теперь можно начинать экспедицию.";
+});
+renderTruth();
+render();
+</script>
+</body>
+</html>
